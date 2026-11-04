@@ -1,7 +1,52 @@
 {
+  // Biome as default formatter
+  "editor.defaultFormatter": "biomejs.biome",
+  "editor.formatOnSave": true,
   "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "source.organizeImports": "explicit",
-    "source.sortMembers": "explicit"
+    "source.fixAll.biome": "explicit"
+  },
+
+  // TypeScript
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "typescript.suggest.autoImports": true,
+  "typescript.tsdk": "node_modules/typescript/lib",
+
+  // Disable conflicting formatters
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+
+  // File associations
+  "files.associations": {
+    "*.css": "css"
+  },
+
+  // Search exclusions
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.expo": true,
+    "**/android": true,
+    "**/ios": true
+  },
+
+  // File nesting
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, .npmrc, .env, .env.*, .editorconfig, biome.jsonc, tsconfig.json",
+    "*.ts": "${capture}.test.ts",
+    "*.tsx": "${capture}.test.tsx"
   }
 }

@@ -1,0 +1,94 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    name: Dependency Security Report
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - name: Install dependencies
+        run: npm ci
+        env:
+          HUSKY: '0'
+      - name: Audit all and production dependencies
+        run: npm run security:report
+      - name: Upload security evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-security-report
+          path: artifacts/security/
+          if-no-files-found: error
+          retention-days: 14
+
+  quality:
+    name: Quality Checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Expo Doctor
+        run: npx expo-doctor@latest
+
+      - name: Expo dependency compatibility
+        run: npm run deps:check
+
+      - name: TypeScript check
+        run: npm run typecheck
+
+      - name: Biome lint
+        run: npm run lint
+
+      - name: Biome format check
+        run: npm run format:check
+
+      - name: Run tests
+        run: npm run test:ci
+
+      - name: Biome combined check
+        run: npm run check
+
+      - name: Git hook integration
+        run: npm run hooks:verify
+
+      - name: Export web routes
+        run: npm run export:web
+        env:
+          EXPO_PUBLIC_API_URL: https://api.example.test
+          EXPO_PUBLIC_APP_ENV: preview
